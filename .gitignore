@@ -1,0 +1,12 @@
+# Terraform directories & state
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# Variables (local / sensitive)
+terraform.tfvars
+
+# VS Code & OS
+.vscode/
+.DS_Store
