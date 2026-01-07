@@ -1,9 +1,10 @@
-name: Terraform CI (fmt/validate/plan)
+name: Terraform CI (fmt/validate) + Manual Plan
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -34,11 +35,7 @@ jobs:
       - name: Terraform validate
         run: terraform validate
 
-      # Optional: plan ONLY if AWS creds are configured in GitHub Secrets
-      - name: Terraform plan (only when AWS creds exist)
-        if: ${{ secrets.AWS_ACCESS_KEY_ID != '' && secrets.AWS_SECRET_ACCESS_KEY != '' }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ap-south-1
+      # Plan is optional: only runs when YOU manually click "Run workflow"
+      - name: Terraform plan (manual only)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         run: terraform plan -no-color
