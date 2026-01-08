@@ -64,6 +64,15 @@ resource "aws_subnet" "subnet_a_private" {
   availability_zone = "${var.region_mumbai}b"
   tags              = { Name = "${var.project_name}-subnet-a2-private" }
 }
+resource "aws_subnet" "subnet_a_private_3" {
+  vpc_id                  = aws_vpc.vpc_a.id
+  cidr_block              = var.subnet_a3_private_cidr
+  availability_zone       = var.az_mumbai_private_3
+  map_public_ip_on_launch = false
+
+  tags = { Name = "${var.project_name}-subnet-a3-private" }
+}
+
 
 resource "aws_route_table" "rt_a_public" {
   vpc_id = aws_vpc.vpc_a.id
@@ -117,13 +126,20 @@ resource "aws_subnet" "subnet_b2_private" {
   availability_zone = "${var.region_virginia}b"
   tags              = { Name = "${var.project_name}-subnet-b2-private" }
 }
+resource "aws_subnet" "subnet_b3_private" {
+  provider                = aws.virginia
+  vpc_id                  = aws_vpc.vpc_b.id
+  cidr_block              = var.subnet_b3_private_cidr
+  availability_zone       = var.az_virginia_private_3
+  map_public_ip_on_launch = false
 
+  tags = { Name = "${var.project_name}-subnet-b3-private" }
+}
 resource "aws_route_table" "rt_b_private" {
   provider = aws.virginia
   vpc_id   = aws_vpc.vpc_b.id
   tags     = { Name = "${var.project_name}-rt-b-private" }
 }
-
 resource "aws_route_table_association" "rt_b1_assoc" {
   provider       = aws.virginia
   subnet_id      = aws_subnet.subnet_b1_private.id
@@ -135,7 +151,15 @@ resource "aws_route_table_association" "rt_b2_assoc" {
   subnet_id      = aws_subnet.subnet_b2_private.id
   route_table_id = aws_route_table.rt_b_private.id
 }
-
+resource "aws_route_table_association" "rt_a_private_3_assoc" {
+  subnet_id      = aws_subnet.subnet_a_private_3.id
+  route_table_id = aws_route_table.rt_a_private.id
+}
+resource "aws_route_table_association" "rt_b3_assoc" {
+  provider       = aws.virginia
+  subnet_id      = aws_subnet.subnet_b3_private.id
+  route_table_id = aws_route_table.rt_b_private.id
+}
 ############################
 # Inter-Region VPC Peering
 ############################
@@ -325,4 +349,23 @@ resource "aws_instance" "ec2_b_private" {
   key_name               = var.key_name_virginia
 
   tags = { Name = "${var.project_name}-ec2-b-private" }
+}
+resource "aws_instance" "ec2_a_private_3" {
+  ami                    = data.aws_ami.al2023_mumbai.id
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.subnet_a_private_3.id
+  vpc_security_group_ids = [aws_security_group.sg_private_a.id]
+  key_name               = var.key_name_private_mumbai
+
+  tags = { Name = "${var.project_name}-ec2-a-private-3" }
+}
+resource "aws_instance" "ec2_b_private_3" {
+  provider               = aws.virginia
+  ami                    = data.aws_ami.al2023_virginia.id
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.subnet_b3_private.id
+  vpc_security_group_ids = [aws_security_group.sg_private_b.id]
+  key_name               = var.key_name_virginia
+
+  tags = { Name = "${var.project_name}-ec2-b-private-3" }
 }

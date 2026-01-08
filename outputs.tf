@@ -13,3 +13,10 @@ output "virginia_ec2_b_private_ip" {
 output "peering_connection_id" {
   value = aws_vpc_peering_connection.pcx.id
 }
+output "mumbai_ec2_a_private_3_ip" {
+  value = aws_instance.ec2_a_private_3.private_ip
+}
+
+output "virginia_ec2_b_private_3_ip" {
+  value = aws_instance.ec2_b_private_3.private_ip
+}
